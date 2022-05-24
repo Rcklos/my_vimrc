@@ -159,7 +159,7 @@ call plug#begin(g:myplugdir)
 "文件浏览器
 " Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 "tags生成和边栏
-" Plug 'preservim/tagbar', { 'on':  'TagbarToggle' }
+"Plug 'preservim/tagbar', { 'on':  'TagbarToggle' }
 " 内置终端插件
 Plug 'skywind3000/vim-terminal-help'
 " 单元测试
@@ -182,8 +182,8 @@ Plug 'preservim/nerdcommenter'
 Plug 'puremourning/vimspector', {'do':'./install_gadget.py --enable-c'}
 "markdown
 "Plug 'iamcco/markdown-preview.vim'
-"Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown', 'do': 'yarn install'}
-Plug 'instant-markdown/vim-instant-markdown'
+Plug 'instant-markdown/vim-instant-markdown', {'for': 'markdown', 'do': 'yarn install'}
+"Plug 'instant-markdown/vim-instant-markdown'
 Plug 'IC-killer/vim-Ken'
 "翻译
 "Plug 'voldikss/vim-translator'
@@ -193,7 +193,15 @@ Plug 'yianwillis/vimcdoc'
 Plug 'Shougo/vinarise.vim'
 "easymotion
 Plug 'easymotion/vim-easymotion'
+" live server
+Plug 'turbio/bracey.vim'
+" html/css/js
+Plug 'mattn/emmet-vim'
 
+Plug 'liuchengxu/vista.vim'
+
+" C#
+Plug 'OmniSharp/omnisharp-vim'
 call plug#end()
 
 "翻译
@@ -288,14 +296,21 @@ nmap <tab> :bn<cr>
 " let g:NERDTreeShowBookmarks = 1 
 " let g:NERDTreeShowHidden = 1 
 
-" 内置终端配置
+" 内置终端配置随vim退出
 let g:terminal_kill = 'term'
+" 不显示在buffer上
+let g:terminal_list = 0
+" 自动修正高度
+let g:terminal_fixheight = 1
+" exit自动关闭窗口
+let g:terminal_close = 1
 " 自定义终端程序
 if (has("gui_running") && has("win64"))
   " 如果是GVIM且是win64, 则使用git-bash
   let g:terminal_shell='D:\Git\bin\bash.exe'
 endif
-let g:terminal_cwd = 2
+" cwd -> 0: unchanged, 1: filepath, 2: project root
+let g:terminal_cwd = 0
 
 "---------------------------------------------------------------------------------------------------
 "ctags 配置
@@ -439,7 +454,8 @@ map <F3> :CocCommand explorer<CR>
 " map <F3> :NERDTreeToggle<CR>
 "nnoremap <leader><F3> :NERDTreeToggle<CR>
 "打开/关闭tagbar
-" map <F4> :TagbarToggle<CR>
+"map <F4> :TagbarToggle<CR>
+map <F4> :Vista!!<CR>
 "nnoremap <leader><F4> :TagbarToggle<CR>
 
 
@@ -582,3 +598,31 @@ let test#strategy = {
   \ }
 " unittest
 let test#python#runner = 'pyunit'
+
+"vista
+function! NearestMethodOrFunction() abort
+  return get(b:, 'vista_nearest_method_or_function', '')
+endfunction
+
+set statusline+=%{NearestMethodOrFunction()}
+
+" By default vista.vim never run if you don't call it explicitly.
+"
+" If you want to show the nearest function in your statusline automatically,
+" you can add the following line to your vimrc
+autocmd VimEnter * call vista#RunForNearestMethodOrFunction()
+let g:vista_default_executive = 'ctags'
+" Ensure you have installed some decent font to show these pretty symbols, then you can enable icon for the kind.
+let g:vista#renderer#enable_icon = 1
+
+" The default icons can't be suitable for all the filetypes, you can extend it as you wish.
+let g:vista#renderer#icons = {
+\   "function": "\uf794",
+\   "variable": "\uf71b",
+\  }
+
+" C# 配置
+let g:OmniSharp_server_path = 'C:\Users\20152\AppData\Local\omnisharp-vim\omnisharp-roslyn\OmniSharp.exe'
+inoremap <expr> <Tab> pumvisible() ? '<C-n>' :                                                                                                                    
+\ getline('.')[col('.')-2] =~# '[[:alnum:].-_#$]' ? '<C-x><C-o>' : '<Tab>'
+
